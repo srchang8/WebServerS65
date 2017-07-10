@@ -1,0 +1,51 @@
+PURPOSE
+The purpose of wsng is to provide the basic features of a HTTP server.
+
+FEATURES
+wsng provides the following features commonly found in HTTP servers:
+
+- GET returns the contents of a file, including size and timestamp
+- HEAD returns metadata for a file, including size and timestamp
+- execution of CGI scripts
+- passing parameters as QUERY_STRING
+- error handling for non-existent files, bad requests etc.
+
+IMPLEMENTATION
+We first read the config file and open a server socket. The config file may
+contain content type mappings, which are stored in a linked list.
+
+When a request comes in, we start a child process that handles the request.
+Each time we start a child process, we check if there are zombie processes 
+and reap them if necessary.
+
+The child process parses and executes the request:
+- split path and query
+- remove '..' from path
+- return 404 error if file does not exist
+- execute file if its extension is .cgi
+- otherwise, set content type according to file extension and return its content
+- if file is a directory:
+  - if it contains an index.cgi file, execute it and return the result
+  - if it contains an index.html file, return its contents
+  - otherwise, list directory contents as a HTML page
+
+
+FILE DETAILS
+
+ws.c                -- main file of the project
+config.c/.h         -- handles config file
+socklib.c/.h        -- socket library
+util.c/.h           -- util functions
+
+makefile            -- the makefile
+plan.txt            -- a description of the design and operation of my code
+typescript          -- a sample run
+readme.txt          -- this readme file
+    
+NOTES:
+
+The makefile provides the following commands:
+
+make                -- compile and link wsng
+make run            -- run wsng
+make clean          -- delete generated files
